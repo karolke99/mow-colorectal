@@ -15,6 +15,8 @@ files = [
     # ('std_filled_median.csv', 'filled_median.csv'),
 ]
 
+rsme_list = []
+
 for file, file2 in files:
     print('\nFile: ', file)
     df = pd.read_csv('../dataset/' + file)
@@ -29,6 +31,7 @@ for file, file2 in files:
     rf_model = RandomForestRegressor(random_state=1)
     rf_model.fit(X_train, y_train)
     rf_pred = rf_model.predict(X_test)
+    plot_predictions(y_test, rf_pred, 'Random Forest')
     predicted_values_original_scale = rf_pred * std + mean
     y_test_original_scale = y_test * std + mean
     rf_mse = np.sqrt(mean_squared_error(y_test_original_scale, predicted_values_original_scale))
@@ -76,6 +79,13 @@ for file, file2 in files:
 
     xgb_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
     print("XGBoost: ", xgb_mse, xgb_r2_score)
+
+    plt.bar(['RF', 'SVR', 'NUSVR', 'CB', 'XGB'], [rf_mse, svr_mse, nusvr_mse, cb_mse, xgb_mse], color='b')
+    plt.title('Root Mean Squared Error (RMSE) Plot')
+    plt.grid()
+    plt.xlabel(file)
+    plt.ylabel('RMSE Value')
+    plt.show()
 
 
 files = [
@@ -148,6 +158,21 @@ for file, file2 in files:
 
     xgb_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
     print("XGBoost: ", xgb_mse, xgb_r2_score)
+
+    plt.bar(['RF', 'SVR', 'NUSVR', 'CB', 'XGB'], [rf_mse, svr_mse, nusvr_mse, cb_mse, xgb_mse], color='b')
+    plt.title('Root Mean Squared Error (RMSE) Plot')
+    plt.grid()
+    plt.xlabel(file)
+    plt.ylabel('RMSE Value')
+    plt.show()
+
+    rmse_dict = {}
+    rmse_dict['RF'] = rf_mse
+    rmse_dict['SVR'] = svr_mse
+    rmse_dict['NUSVR'] = nusvr_mse
+    rmse_dict['CB'] = cb_mse
+    rmse_dict['XGB'] = xgb_mse
+    rsme_list.append(rmse_dict)
 
 
 # predicted_values = model.predict(scaled_features)  # Zakodowane przez model wartości
