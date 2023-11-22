@@ -8,11 +8,22 @@ from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 
+import matplotlib.pyplot as plt
+
+def plot_predictions(y_true, y_pred, model_label):
+        plt.plot(range(len(y_true)), y_true, label='Actual')
+        plt.plot(range(len(y_pred)), y_pred, label='Predicted')
+        plt.title('Actual vs Predicted: ' + model_label)
+        plt.xlabel('Sample')
+        plt.ylabel('Value')
+        plt.legend()
+        plt.show()
+
 
 files = [
     ('std_filled_average.csv', 'filled_average.csv'),
-    # ('std_filled_knn.csv', 'filled_knn.csv'),
-    # ('std_filled_median.csv', 'filled_median.csv'),
+    ('std_filled_knn.csv', 'filled_knn.csv'),
+    ('std_filled_median.csv', 'filled_median.csv'),
 ]
 
 rsme_list = []
@@ -34,20 +45,23 @@ for file, file2 in files:
     plot_predictions(y_test, rf_pred, 'Random Forest')
     predicted_values_original_scale = rf_pred * std + mean
     y_test_original_scale = y_test * std + mean
+
     rf_mse = np.sqrt(mean_squared_error(y_test_original_scale, predicted_values_original_scale))
     rf_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
+
+    plot_predictions(y_test_original_scale, predicted_values_original_scale, 'Random Forest')
     print("Random Forest: ", rf_mse, rf_r2_score)
+    # plot_rmse(rf_mse, "asdf")
 
     # SVC
     # SVR
     svr_model = SVR()
     svr_model.fit(X_train, y_train)
     svr_pred = svr_model.predict(X_test)
-
     predicted_values_original_scale = svr_pred * std + mean
     svr_mse = np.sqrt(mean_squared_error(y_test_original_scale, predicted_values_original_scale))
-
     svr_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
+    plot_predictions(y_test_original_scale, predicted_values_original_scale, 'SVR')
     print("SVR: ", svr_mse, svr_r2_score)
 
     # NuSVR
@@ -56,7 +70,7 @@ for file, file2 in files:
     nusvr_pred = nusvr_model.predict(X_test)
     predicted_values_original_scale = nusvr_pred * std + mean
     nusvr_mse = np.sqrt(mean_squared_error(y_test_original_scale, predicted_values_original_scale))
-
+    plot_predictions(y_test_original_scale, predicted_values_original_scale, 'NuSVR')
     nusvr_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
     print("NuSVR: ", nusvr_mse, nusvr_r2_score)
 
@@ -66,7 +80,7 @@ for file, file2 in files:
     cb_pred = cb_model.predict(X_test)
     predicted_values_original_scale = cb_pred * std + mean
     cb_mse = np.sqrt(mean_squared_error(y_test_original_scale, predicted_values_original_scale))
-
+    plot_predictions(y_test_original_scale, predicted_values_original_scale, 'NuSVR')
     cb_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
     print("Catboost: ", cb_mse, cb_r2_score)
 
@@ -76,7 +90,7 @@ for file, file2 in files:
     xgb_pred = xgb_model.predict(X_test)
     predicted_values_original_scale = xgb_pred * std + mean
     xgb_mse = np.sqrt(mean_squared_error(y_test_original_scale, predicted_values_original_scale))
-
+    plot_predictions(y_test_original_scale, predicted_values_original_scale, 'XGBoost')
     xgb_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
     print("XGBoost: ", xgb_mse, xgb_r2_score)
 
@@ -100,8 +114,6 @@ for file, file2 in files:
     df2 = pd.read_csv('../dataset/' + file2)
     X = df.drop(["weight", "height", "optime"], axis=1)
 
-    # original_min = np.min(df['optime'], axis=0)
-    # original_max = np.max(df['optime'], axis=0)
     original_min = df2['optime'].min()
     original_max = df2['optime'].max()
     X_train, X_test, y_train, y_test = train_test_split(X, df['optime'], test_size=0.2, random_state=1)
@@ -111,8 +123,8 @@ for file, file2 in files:
     rf_model = RandomForestRegressor(random_state=1)
     rf_model.fit(X_train, y_train)
     rf_pred = rf_model.predict(X_test)
-
     predicted_values_original_scale = rf_pred * (original_max - original_min) + original_min
+    plot_predictions(y_test_original_scale, predicted_values_original_scale, 'Random Forest')
     rf_mse = np.sqrt(mean_squared_error(y_test_original_scale, predicted_values_original_scale))
     rf_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
     print("Random Forest: ", rf_mse, rf_r2_score)
@@ -122,10 +134,9 @@ for file, file2 in files:
     svr_model = SVR()
     svr_model.fit(X_train, y_train)
     svr_pred = svr_model.predict(X_test)
-
     predicted_values_original_scale = svr_pred * (original_max - original_min) + original_min
     svr_mse = np.sqrt(mean_squared_error(y_test_original_scale, predicted_values_original_scale))
-
+    plot_predictions(y_test_original_scale, predicted_values_original_scale, 'SVR')
     svr_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
     print("SVR: ", svr_mse, svr_r2_score)
 
@@ -135,7 +146,7 @@ for file, file2 in files:
     nusvr_pred = nusvr_model.predict(X_test)
     predicted_values_original_scale = nusvr_pred * (original_max - original_min) + original_min
     nusvr_mse = np.sqrt(mean_squared_error(y_test_original_scale, predicted_values_original_scale))
-
+    plot_predictions(y_test_original_scale, predicted_values_original_scale, 'NuSVR')
     nusvr_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
     print("NuSVR: ", nusvr_mse, nusvr_r2_score)
 
@@ -145,7 +156,7 @@ for file, file2 in files:
     cb_pred = cb_model.predict(X_test)
     predicted_values_original_scale = cb_pred * (original_max - original_min) + original_min
     cb_mse = np.sqrt(mean_squared_error(y_test_original_scale, predicted_values_original_scale))
-
+    plot_predictions(y_test_original_scale, predicted_values_original_scale, 'CatBoost')
     cb_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
     print("Catboost: ", cb_mse, cb_r2_score)
 
@@ -155,7 +166,7 @@ for file, file2 in files:
     xgb_pred = xgb_model.predict(X_test)
     predicted_values_original_scale = xgb_pred * (original_max - original_min) + original_min
     xgb_mse = np.sqrt(mean_squared_error(y_test_original_scale, predicted_values_original_scale))
-
+    plot_predictions(y_test_original_scale, predicted_values_original_scale, 'XGBoost')
     xgb_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
     print("XGBoost: ", xgb_mse, xgb_r2_score)
 
@@ -174,10 +185,3 @@ for file, file2 in files:
     rmse_dict['XGB'] = xgb_mse
     rsme_list.append(rmse_dict)
 
-
-# predicted_values = model.predict(scaled_features)  # Zakodowane przez model wartości
-# original_min = np.min(original_features, axis=0)
-# original_max = np.max(original_features, axis=0)
-#
-# # Przywracanie pierwotnych wartości
-# predicted_values_original_scale = predicted_values * (original_max - original_min) + original_min
