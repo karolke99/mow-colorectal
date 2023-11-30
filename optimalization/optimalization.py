@@ -28,14 +28,15 @@ def cross_validation(model, X, y, k=5):
 
     return average_mse, min_mse, mse_scores
 
-df = pd.read_csv('../dataset/min_max_filled_knn.csv')
-df2 = pd.read_csv('../dataset/filled_knn.csv')
+df = pd.read_csv('../optimalization/selected_std_filled_knn.csv_filled_knn.csv')
+df2 = pd.read_csv('../newDataset/filled_knn.csv')
 
 max = df2['optime'].max()
 min = df2['optime'].min()
 y_original = df2['optime']
 
-X = df.drop(["weight", "height", "optime"], axis=1)
+# X = df.drop(["weight", "height", "optime"], axis=1)
+X = df.drop(["optime"], axis=1)
 
 X_train, X_temp, y_train, y_temp = train_test_split(X, df['optime'], test_size=0.3, random_state=1)
 X_eval, X_test, y_eval, t_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=1)
@@ -51,7 +52,7 @@ y = y_eval * (y_original.max() - y_original.min()) + y_original.min()
 cb_mse = np.sqrt(mean_squared_error(y, cb_pred))
 
 print("Catboost: ", cb_mse)
-# print("Cross validation", cross_validation(cb_model, X, df['optime']))
+print("Cross validation", cross_validation(cb_model, X, df['optime']))
 
 param_grid = {
     'iterations': [100, 200, 500],
