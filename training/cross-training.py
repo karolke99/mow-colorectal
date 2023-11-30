@@ -36,11 +36,11 @@ def cross_validation(model, X, y, k=5):
 
 files = [
     ('std_filled_average.csv', 'filled_average.csv'),
-    # ('std_filled_knn.csv', 'filled_knn.csv'),
-    # ('std_filled_median.csv', 'filled_median.csv'),
-    # ('min_max_filled_average.csv', 'filled_average.csv'),
-    # ('min_max_filled_knn.csv', 'filled_knn.csv'),
-    # ('min_max_filled_median.csv', 'filled_median.csv')
+    ('std_filled_knn.csv', 'filled_knn.csv'),
+    ('std_filled_median.csv', 'filled_median.csv'),
+    ('min_max_filled_average.csv', 'filled_average.csv'),
+    ('min_max_filled_knn.csv', 'filled_knn.csv'),
+    ('min_max_filled_median.csv', 'filled_median.csv')
 ]
 
 for file, file2 in files:

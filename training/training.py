@@ -7,7 +7,6 @@ from sklearn.svm import NuSVR
 from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
 from sklearn.metrics import mean_squared_error, r2_score
-
 import matplotlib.pyplot as plt
 
 
@@ -34,8 +33,8 @@ rsme_list = []
 
 for file, file2 in files:
     print('\nFile: ', file)
-    df = pd.read_csv('../dataset/' + file)
-    df2 = pd.read_csv('../dataset/' + file2)
+    df = pd.read_csv('../newDataset/' + file)
+    df2 = pd.read_csv('../newDataset/' + file2)
     X = df.drop(["weight", "height", "optime"], axis=1)
 
     mean = df2['optime'].mean()
@@ -87,6 +86,12 @@ for file, file2 in files:
     cb_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
     print("Catboost: ", cb_mse, cb_r2_score)
 
+    # Save best model to file
+    if file == 'std_filled_knn.csv':
+        cb_model.save_model(f'../models/{file}.cbm')
+
+
+
     # XGBBoost
     xgb_model = XGBRegressor()
     xgb_model.fit(X_train, y_train)
@@ -107,6 +112,18 @@ for file, file2 in files:
     plt.savefig(f'trained_plots/{file}.png')
     plt.close()
 
+
+
+    plt.figure()
+    plt.bar(['RF', 'SVR', 'NUSVR', 'CB', 'XGB'], [rf_r2_score, svr_r2_score, nusvr_r2_score, cb_r2_score, xgb_r2_score], color='indianred')
+    plt.title('R2 Plot for Std scaled datasets')
+    plt.grid()
+    plt.xlabel(file)
+    plt.ylabel('R2 Value')
+    # plt.show()
+    plt.savefig(f'trained_plots/R2_{file}.png')
+    plt.close()
+
 files = [
     ('min_max_filled_average.csv', 'filled_average.csv'),
     ('min_max_filled_knn.csv', 'filled_knn.csv'),
@@ -115,8 +132,8 @@ files = [
 
 for file, file2 in files:
     print('\nFile: ', file)
-    df = pd.read_csv('../dataset/' + file)
-    df2 = pd.read_csv('../dataset/' + file2)
+    df = pd.read_csv('../newDataset/' + file)
+    df2 = pd.read_csv('../newDataset/' + file2)
     X = df.drop(["weight", "height", "optime"], axis=1)
 
     original_min = df2['optime'].min()
@@ -165,6 +182,11 @@ for file, file2 in files:
     cb_r2_score = r2_score(y_test_original_scale, predicted_values_original_scale)
     print("Catboost: ", cb_mse, cb_r2_score)
 
+    # Save best model to file
+    # Save best model to file
+    if file == 'min_max_filled_knn.csv':
+        cb_model.save_model(f'../models/{file}.cbm')
+
     # XGBBoost
     xgb_model = XGBRegressor()
     xgb_model.fit(X_train, y_train)
@@ -183,6 +205,17 @@ for file, file2 in files:
     plt.ylabel('RMSE Value')
     # plt.show()
     plt.savefig(f'trained_plots/{file}.png')
+
+    plt.close()
+
+    plt.figure()
+    plt.bar(['RF', 'SVR', 'NUSVR', 'CB', 'XGB'], [rf_r2_score, svr_r2_score, nusvr_r2_score, cb_r2_score, xgb_r2_score], color='indianred')
+    plt.title('R2 Plot for Std scaled datasets')
+    plt.grid()
+    plt.xlabel(file)
+    plt.ylabel('R2 Value')
+    # plt.show()
+    plt.savefig(f'trained_plots/R2_{file}.png')
     plt.close()
 
     rmse_dict = {}
