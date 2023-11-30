@@ -55,7 +55,7 @@ print("Catboost: ", cb_mse)
 print("Cross validation", cross_validation(cb_model, X, df['optime']))
 
 param_grid = {
-    'iterations': [100, 200, 500],
+    'iterations': [i * 50 for i in range(10)],
     'learning_rate': [0.01, 0.05, 0.1],
     'l2_leaf_reg': [1, 3, 5],
     'loss_function': ['RMSE', 'MAE', 'Poisson', 'MAPE'],
