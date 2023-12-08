@@ -31,27 +31,33 @@ def cross_validation(model, X, y, k=5):
 
 
 # df = pd.read_csv('../dataset/min_max_filled_knn.csv')
-df = pd.read_csv('../optimalization/selected_min_max_filled_knn.csv')
+df = pd.read_csv('../optimalization/selected_std_filled_knn.csv')
 df2 = pd.read_csv('../newDataset/filled_knn.csv')
 
-max = df2['optime'].max()
-min = df2['optime'].min()
+# max = df2['optime'].max()
+# min = df2['optime'].min()
+mean = df2['optime'].mean()
+std = df2['optime'].std()
+
 y_original = df2['optime']
 
 # X = df.drop(["weight", "height", "optime"], axis=1)
 X = df.drop(["optime"], axis=1)
 
-X_train, X_temp, y_train, y_temp = train_test_split(X, df['optime'], test_size=0.3, random_state=1)
-X_eval, X_test, y_eval, t_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=1)
+# X_train, X_temp, y_train, y_temp = train_test_split(X, df['optime'], test_size=0.4, random_state=1)
+# X_eval, X_test, y_eval, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=1)
 
-print(X_train.shape, X_eval.shape, X_test.shape)
+X_train, X_test, y_train, y_test = train_test_split(X, df['optime'], test_size=0.2, random_state=1)
+
+# print(X_train.shape, X_eval.shape, X_test.shape)
 
 cb_model = CatBoostRegressor(random_state=1, verbose=0)
 cb_model.fit(X_train, y_train)
-cb_pred = cb_model.predict(X_eval)
-
-cb_pred = cb_pred * (max - min) + min
-y = y_eval * (y_original.max() - y_original.min()) + y_original.min()
+# cb_pred = cb_model.predict(X_eval)
+cb_pred = cb_model.predict(X_test)
+cb_pred = cb_pred * std + mean
+# y = y_eval * std + mean
+y = y_test * std + mean
 cb_mse = np.sqrt(mean_squared_error(y, cb_pred))
 
 print("Catboost: ", cb_mse)
@@ -90,23 +96,37 @@ def objective(trial):
         # 'od_wait': trial.suggest_int('od_wait', 10, 30, 5),
     }
 
-    cb_model = CatBoostRegressor(**param_grid)
+    cb_model = CatBoostRegressor(**param_grid, random_state=1, verbose=0)
     cb_model.fit(X_train, y_train)
 
-    y_pred = cb_model.predict(X_eval)
-
-    y_pred = y_pred * (max - min) + min
+    # y_pred = cb_model.predict(X_eval)
+    y_pred = cb_model.predict(X_test)
+    # y_pred = y_pred * (max - min) + min
+    y_pred = y_pred * std + mean
     rmse = np.sqrt(mean_squared_error(y, y_pred))
     # mse = mean_squared_error(y_eval, y_pred)
     return rmse
 
-
-
 study = optuna.create_study(direction='minimize')
-study.optimize(objective, n_jobs=-1, n_trials=2000)
+study.optimize(objective, n_jobs=-1, n_trials=1000)
 trial = study.best_params
 print(trial)
 
 print(f'Best: params: {study.best_params}')
 print(f'Best value: {study.best_value}')
 print(f'Best trial: {study.best_trial}')
+
+best_params = study.best_params
+best_params.update({'random_state': 1, 'verbose': 0})
+
+best_model = CatBoostRegressor(**best_params)
+best_model.fit(X_train, y_train)
+
+y_pred = best_model.predict(X_test)
+y_pred = y_pred * std + mean
+y = y_test * std + mean
+
+rmse = np.sqrt(mean_squared_error(y, y_pred))
+print(f'RMSE: {rmse}')
+
+
