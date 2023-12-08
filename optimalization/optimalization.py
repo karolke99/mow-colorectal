@@ -28,7 +28,8 @@ def cross_validation(model, X, y, k=5):
 
     return average_mse, min_mse, mse_scores
 
-df = pd.read_csv('../optimalization/selected_std_filled_knn.csv_filled_knn.csv')
+
+df = pd.read_csv('../optimalization/selected_std_filled_knn.csv')
 df2 = pd.read_csv('../newDataset/filled_knn.csv')
 
 max = df2['optime'].max()
@@ -57,18 +58,18 @@ print("Cross validation", cross_validation(cb_model, X, df['optime']))
 param_grid = {
     'iterations': [i * 50 for i in range(10)],
     'learning_rate': [0.01, 0.05, 0.1],
-    'l2_leaf_reg': [1, 3, 5],
+    'l2_leaf_reg': [30, 50, 60],
     'loss_function': ['RMSE', 'MAE', 'Poisson', 'MAPE'],
     # 'boostrap_type': ['MVS', 'Bayesian', 'Bernoulli'],
-    'bagging_temperature': [None, 0.5, 1, 10],
+    'bagging_temperature':  [0.5, 1, 2],
     # 'subsample': [0, 1],
     # 'sampling_frequency': ['PerTree', 'PerTreeLevel'],
     # 'sampling_unit': ['Object', 'Group'],
     # 'mvs_reg': [0, 0.5, 1],
-    'random_strength': [0, 0.5, 1],
-    'use_best_model': [True, False],
+    'random_strength': [0, 0.5, 0.5],
+    # 'use_best_model': [True, False],
     # 'best_model_min_tree': [0, 1, 2],
-    'depth': [4, 6, 8],
+    'depth': [2, 4, 8],
     # 'grow_policy': ['SymmetricTree','Lossguide','Depthwise'],
     # 'min_data_in_leaf': [1, 2, 3],
     # 'max_leaves': [None, 10, 20],
@@ -80,9 +81,9 @@ param_grid = {
     # 'posterior_sampling': [True, False],
     # 'score_function': ['Cosine', 'L2', 'NewtonCosine', 'NewtonL2'],
     # 'monotone_constraints': [1, 0, -1],
-    'od_type': ['InctoDec', 'Iter'],
-    'od_pval': [1e-5, 1e-10, 1e-20],
-    'od_wait': [10, 20, 30]
+    'od_type': ['InctoDec', 'Iter']
+    # 'od_pval': [1e-5, 1e-10, 1e-20],
+    # 'od_wait': [10, 20, 30]
 }
 
 grid_search = GridSearchCV(cb_model, param_grid, cv=5, n_jobs=-1)
